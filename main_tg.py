@@ -57,6 +57,29 @@ def connect(name_func, intent, param, message):
             res = f"'400': bad function:{unknown_func}"
     return res, message
 
+def get_step_subfunctions(step, dialog):
+    stop = False
+    i = 0
+    while not stop:
+        print("i", i)
+        print('step', step)
+        intent = dialog[step+i]
+        type_of_func = get_type_of_func(intent)
+        if type_of_func == FUNC.TYPE_SUBFUNCTION:
+            i+=1
+        else:
+            stop = True
+    return i + step
+
+
+def save_param(step, res, param, name_func, dialog, item_file_dialog,
+                item_file_param):
+    dialog[step] = {res: name_func}
+    save_file(item_file_dialog, data=dialog)
+    step += 1
+    param[RES.STEP] = step
+    save_file(item_file_param, param)
+
 
 def bot_core(message):
     dialog = load_file(item_file_dialog)
@@ -69,17 +92,22 @@ def bot_core(message):
     res = None
     type_of_func = get_type_of_func(intent)
     name_func = get_func(intent)
+    if type_of_func == FUNC.TYPE_SUBFUNCTION:
+        steps = get_step_subfunctions(step, dialog=dialog)
+        print("steps:", steps)
+        for i in range(step, steps+1):
+            intent = dialog[i]
+            type_of_func = get_type_of_func(intent)
+            name_func = get_func(intent)
+            res, param = subfunction(name_func, message, param)
+            save_param(step, res, param, name_func, dialog, item_file_dialog,
+                item_file_param)
     if type_of_func == FUNC.TYPE_CONNECTION:
         res, message = connect(name_func, intent, param, message)
-    if type_of_func == FUNC.TYPE_SUBFUNCTION:
-        res, param = subfunction(name_func, message, param)
     print('res', res)
     print('res param:', param)
-    dialog[step] = {res: name_func}
-    save_file(item_file_dialog, data=dialog)
-    step += 1
-    param[RES.STEP] = step
-    save_file(item_file_param, param)
+    save_param(step, res, param, name_func, dialog, item_file_dialog,
+                item_file_param)
     return res
 
 
@@ -96,9 +124,7 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler()
 async def echo(message: types.Message):
-	print('type:', types.Message)
 	message_text = message['text']
-	print('text:', message_text)
 	bot_message_text = bot_core(message=message_text)
 	await message.answer(bot_message_text)
 
