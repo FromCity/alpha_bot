@@ -20,7 +20,10 @@ save_file(
     data=param)
 
 
-def subfunction(name_func, message, param):
+def subfunction(name_func, intent, param, message):
+    print("intent_subfunc:", message)
+    print("name_func:", name_func)
+    print('print subfunc:', param)
     match name_func:
         case FUNC.subfunction.FIND_NAME:
             param['NAME'] = find_name(sentence=message)
@@ -29,10 +32,11 @@ def subfunction(name_func, message, param):
             param['AGE'] = find_number(sentence=message)
             res = False
         case FUNC.subfunction.WAIT:
-            seconds = wait(intent=message)
+            seconds = wait(intent=intent)
             res = seconds
         case _ as unknown_func:
             res = f"'400': bad function:{unknown_func}"
+    print("param before return", param)
     return res, param
 
 
@@ -57,19 +61,20 @@ def connect(name_func, intent, param, message):
             res = f"'400': bad function:{unknown_func}"
     return res, message
 
+
 def get_step_subfunctions(step, dialog):
     stop = False
-    i = 0
+    i = step
     while not stop:
         print("i", i)
         print('step', step)
-        intent = dialog[step+i]
+        intent = dialog[i]
         type_of_func = get_type_of_func(intent)
         if type_of_func == FUNC.TYPE_SUBFUNCTION:
             i+=1
         else:
             stop = True
-    return i + step
+    return i
 
 
 def save_param(step, res, param, name_func, dialog, item_file_dialog,
@@ -94,16 +99,23 @@ def bot_core(message):
     name_func = get_func(intent)
     if type_of_func == FUNC.TYPE_SUBFUNCTION:
         steps = get_step_subfunctions(step, dialog=dialog)
-        print("steps:", steps)
+        print("steps:", steps+1)
         for i in range(step, steps+1):
             intent = dialog[i]
             type_of_func = get_type_of_func(intent)
             name_func = get_func(intent)
-            res, param = subfunction(name_func, message, param)
+            print('name_func:', name_func)
+            print('i:',i)
+            print('param', param)
+            res, param = subfunction(name_func, intent, param, message)
+            print("res from subfunc:", res)
+            param[RES.STEP]+=1
+            print("param from subfunc:", param)
             save_param(step, res, param, name_func, dialog, item_file_dialog,
                 item_file_param)
     if type_of_func == FUNC.TYPE_CONNECTION:
         res, message = connect(name_func, intent, param, message)
+        param[RES.STEP]+=1
     print('res', res)
     print('res param:', param)
     save_param(step, res, param, name_func, dialog, item_file_dialog,
