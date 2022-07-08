@@ -56,15 +56,12 @@ def say(intent):
 
 def saywith(intent, name):
     sentence = say(intent)
-    print('sentence', sentence)
-    print('name', name)
     sentence = re.sub(r'NAME', name, sentence)
     return sentence
 
 
 def wait(intent):
     sec = float(get_data(intent))
-    print('sec:', sec)
     sleep(sec)
     return sec
 
@@ -87,13 +84,9 @@ def find(sentence):
 
 
 def find_name(sentence, names = ['Aleksey', 'Jonson' , 'Ivan', 'Mikki']):
-    print('sentence', sentence)
     l = sentence.split()
-    print('l after split', l)
     for word in l:
-        print('word in l:', word)
         if word in names:
-            print('word:', word)
             return word
     return None
 
