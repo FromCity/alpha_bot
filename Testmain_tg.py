@@ -1,20 +1,34 @@
 import unittest
 
-from main_tg import bot_core
+from main_tg import get_step_subfunctions
+from lib.dialog import dialog
+from main_tg import save_param, load_param
+from lib.param import functions as FUNC
 
-class Testmain_tg(unittest.TestCase):
-    
-    def test_hello(self):
-        self.assertEqual(bot_core('hi'), "hello! It's me")
 
-    def test_how_are_you(self):
-        self.assertEqual(bot_core('hello'), "how are you?")
+item_file_dialog = 'test_dialog.json'
+item_file_param = 'test_param.json'
 
-    def test_what_is_you_name(self):
-        self.assertEqual(bot_core('good'), "what is you name?")
-    
-    def test_how_old_are_you(self):
-        self.assertEqual(bot_core("Ivan"), "how old are you?")
+class test_get_step_subfunctions(unittest.TestCase):
+
+    '''def test_3(self):
+        self.assertEqual(get_step_subfunctions(3, dialog), 4)
+
+    def test_6(self):
+        self.assertEqual(get_step_subfunctions(6, dialog), 6)'''
+
+    def test_save_0(self):
+        self.assertEqual(
+            save_param(
+                step = 0,
+                res = None,
+                param = {"STEP": 0, "NAME": "", "AGE": 0},
+                type_of_func = FUNC.TYPE_CONNECTION,
+                name_func = FUNC.connect.ASK,
+                dialog = dialog,
+                item_file_dialog = item_file_param,
+                item_file_param = item_file_param),
+                load_param(item_file_dialog, item_file_param))
 
 # Executing the tests in the above test case class
 if __name__ == "__main__":

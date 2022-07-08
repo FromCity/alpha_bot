@@ -61,28 +61,29 @@ def connect(name_func, intent, param, message):
 
 
 def get_step_subfunctions(step, dialog):
-    stop = False
     i = step
-    while not stop:
+    while True:
         intent = dialog[i]
         type_of_func = get_type_of_func(intent)
         if type_of_func == FUNC.TYPE_SUBFUNCTION:
             i+=1
         else:
-            stop = True
-    return i
+            if i > step:
+                return i-1
+            elif i == step:
+                return i
 
 
-def save_param(step, res, param, name_func, dialog, item_file_dialog,
+def save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param):
-    dialog[step] = {res: name_func}
+    step = param[RES.STEP]
+    dialog[step] = {res: [name_func, type_of_func]}
     save_file(item_file_dialog, data=dialog)
-    step += 1
-    param[RES.STEP] = step
     save_file(item_file_param, param)
+    return intent, step, param, dialog
 
 
-def get_param_from_file(item_file_dialog, item_file_param):
+def load_param(item_file_dialog, item_file_param):
     dialog = load_file(item_file_dialog)
     param  = load_file(item_file_param)
     step = param[RES.STEP]
@@ -91,28 +92,39 @@ def get_param_from_file(item_file_dialog, item_file_param):
 
 
 def bot_core(message):
-    intent, step, param, dialog = get_param_from_file(item_file_dialog, item_file_param)
-    if step > 0:
-        intent_previous = dialog[step-1]
+    intent, step, param, dialog = load_param(item_file_dialog, item_file_param)
     res = None
     type_of_func = get_type_of_func(intent)
     name_func = get_func(intent)
+    print('param', param)
     if type_of_func == FUNC.TYPE_SUBFUNCTION:
         steps = get_step_subfunctions(step, dialog=dialog)
-        for i in range(step, steps+1):
-            intent = dialog[i]
+        save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
+                item_file_param)
+        while step < steps:
+            print('use SUBFUNCTION step:', step)
+            print('steps:', steps)
+            intent, step, param, dialog = load_param(item_file_dialog, item_file_param)
+            cprint(f'intent {intent}', 'red')
             type_of_func = get_type_of_func(intent)
             name_func = get_func(intent)
+            print('name_func', name_func)
             res, param = subfunction(name_func, intent, param, message)
+            print('param before save:', param)
+            save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
+                item_file_param)
             param[RES.STEP]+=1
-            save_param(step, res, param, name_func, dialog, item_file_dialog,
-                item_file_param)
+            step = param[RES.STEP]
     if type_of_func == FUNC.TYPE_CONNECTION:
-        intent, step, param, dialog = get_param_from_file(item_file_dialog, item_file_param)
-        param[RES.STEP]+=1
+        print('param from connect:', param)
+        intent, step, param, dialog = load_param(item_file_dialog, item_file_param)
+        print('next param:', param)
         res, message = connect(name_func, intent, param, message)
-    save_param(step, res, param, name_func, dialog, item_file_dialog,
+        param[RES.STEP]+=1
+        print('param before', param)
+        save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
+    print('res', res)
     return res
 
 
