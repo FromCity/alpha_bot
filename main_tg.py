@@ -1,6 +1,7 @@
 import logging # эта библиотека идет вместе с python
 from aiogram import Bot, Dispatcher, executor, types # импортируем aiogram
-from lib.kernel import *
+import internal as Internal
+from lib import kernel as Kernel
 from lib.dialog import dialog
 from lib.param import functions as FUNC
 from lib.param import results as RES
@@ -13,107 +14,31 @@ MAX_STEP = len(dialog)
 intent = dialog[step]
 item_file_dialog = 'test_dialog.json'
 item_file_param = 'test_param.json'
-save_file(
-    item_file=item_file_dialog,
-    data=dialog)
-save_file(
-    item_file=item_file_param,
-    data=param)
-
-
-def subfunction(name_func, intent, param, message):
-    match name_func:
-        case FUNC.subfunction.FIND_NAME:
-            param['NAME'] = find_name(sentence=message)
-            res = False
-        case FUNC.subfunction.FIND_NUMBER:
-            param['AGE'] = find_number(sentence=message)
-            res = False
-        case FUNC.subfunction.WAIT:
-            seconds = wait(intent=intent)
-            res = seconds
-        case _ as unknown_func:
-            res = f"'400': bad function:{unknown_func}"
-            cprint(res, 'yellow')
-    return res, param
-
-
-def connect(name_func, intent, param, message):
-    match name_func:
-        case FUNC.connect.SAY:
-            sentence = say(intent=intent)
-            res = sentence
-        case FUNC.connect.ASK:
-            response, sentence = ask(intent=intent, message=message)
-            res = sentence
-        case FUNC.connect.RESPOND:
-            response = respond(intent=intent)
-            if find(sentence=response):
-                res = f'find!, {response}'
-        case FUNC.connect.SAYWITH:
-            sentence = saywith(
-                                intent=intent,
-                                name=param['NAME'])
-            res = sentence
-        case _ as unknown_func:
-            res = f"'400': bad function:{unknown_func}"
-    return res, message
-
-
-def get_step_subfunctions(step, dialog):
-    i = step
-    while True:
-        intent = dialog[i]
-        type_of_func = get_type_of_func(intent)
-        if type_of_func == FUNC.TYPE_SUBFUNCTION:
-            i+=1
-        else:
-            if i > step:
-                return i-1
-            elif i == step:
-                return i
-
-
-def save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
-                item_file_param):
-    step = param[RES.STEP]
-    dialog[step] = {res: [name_func, type_of_func]}
-    save_file(item_file_dialog, data=dialog)
-    save_file(item_file_param, param)
-    return intent, step, param, dialog
-
-
-def load_param(item_file_dialog, item_file_param):
-    dialog = load_file(item_file_dialog)
-    param  = load_file(item_file_param)
-    step = param[RES.STEP]
-    intent = dialog[step]
-    return intent, step, param, dialog
 
 
 def bot_core(message):
-    intent, step, param, dialog = load_param(item_file_dialog, item_file_param)
+    intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
     res = None
-    type_of_func = get_type_of_func(intent)
-    name_func = get_func(intent)
+    type_of_func = Kernel.get_type_of_func(intent)
+    name_func = Kernel.get_func(intent)
     if type_of_func == FUNC.TYPE_SUBFUNCTION:
-        steps = get_step_subfunctions(step, dialog=dialog)
-        save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
+        steps = Internal.get_step_subfunctions(step, dialog=dialog)
+        Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
         while step < steps:
-            intent, step, param, dialog = load_param(item_file_dialog, item_file_param)
+            intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
             cprint(f'intent {intent}', 'red')
-            type_of_func = get_type_of_func(intent)
-            name_func = get_func(intent)
-            res, param = subfunction(name_func, intent, param, message)
-            save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
+            type_of_func = Kernel.get_type_of_func(intent)
+            name_func = Kernel.get_func(intent)
+            res, param = Internal.subfunction(name_func, intent, param, message)
+            Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
             param[RES.STEP]+=1
             step = param[RES.STEP]
     if type_of_func == FUNC.TYPE_CONNECTION:
-        intent, step, param, dialog = load_param(item_file_dialog, item_file_param)
-        res, message = connect(name_func, intent, param, message)
-        save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
+        intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
+        res, message = Internal.connect(name_func, intent, param, message)
+        Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
         param[RES.STEP]+=1
         step = param[RES.STEP]
@@ -141,4 +66,4 @@ async def echo(message: types.Message):
 
 
 if __name__ == '__main__':
-  executor.start_polling(dp, skip_updates=True)
+    executor.start_polling(dp, skip_updates=True)
