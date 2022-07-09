@@ -96,34 +96,28 @@ def bot_core(message):
     res = None
     type_of_func = get_type_of_func(intent)
     name_func = get_func(intent)
-    print('param', param)
     if type_of_func == FUNC.TYPE_SUBFUNCTION:
         steps = get_step_subfunctions(step, dialog=dialog)
         save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
         while step < steps:
-            print('use SUBFUNCTION step:', step)
-            print('steps:', steps)
             intent, step, param, dialog = load_param(item_file_dialog, item_file_param)
             cprint(f'intent {intent}', 'red')
             type_of_func = get_type_of_func(intent)
             name_func = get_func(intent)
-            print('name_func', name_func)
             res, param = subfunction(name_func, intent, param, message)
-            print('param before save:', param)
             save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
             param[RES.STEP]+=1
             step = param[RES.STEP]
     if type_of_func == FUNC.TYPE_CONNECTION:
-        print('param from connect:', param)
         intent, step, param, dialog = load_param(item_file_dialog, item_file_param)
-        print('next param:', param)
         res, message = connect(name_func, intent, param, message)
-        param[RES.STEP]+=1
-        print('param before', param)
         save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
+        param[RES.STEP]+=1
+        step = param[RES.STEP]
+    print('param', param)
     print('res', res)
     return res
 
