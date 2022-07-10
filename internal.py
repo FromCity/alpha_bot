@@ -1,8 +1,8 @@
+from numpy import number
 from lib import kernel as Kernel
 from lib.param import functions as FUNC
 from lib.param import results as RES
 from termcolor import cprint
-
 
 
 def subfunction(name_func, intent, param, message):
@@ -41,6 +41,7 @@ def connect(name_func, intent, param, message):
             res = sentence
         case _ as unknown_func:
             res = f"'400': bad function:{unknown_func}"
+            cprint(res, 'yellow')
     return res, message
 
 
@@ -74,3 +75,8 @@ def load_param(item_file_dialog, item_file_param):
     step = param[RES.STEP]
     intent = dialog[step]
     return intent, step, param, dialog
+
+
+def get_current_intent(dialog):
+    current_intent = len(dialog)
+    return current_intent
