@@ -1,4 +1,5 @@
-import logging # эта библиотека идет вместе с python
+import logging
+from threading import current_thread # эта библиотека идет вместе с python
 from aiogram import Bot, Dispatcher, executor, types # импортируем aiogram
 import internal as Internal
 from lib import kernel as Kernel
@@ -14,6 +15,7 @@ MAX_STEP = len(dialog)
 intent = dialog[step]
 item_file_dialog = 'test_dialog.json'
 item_file_param = 'test_param.json'
+current_dialog_file = 'test_current_dialog.json'
 
 
 def bot_core(message):
@@ -24,24 +26,28 @@ def bot_core(message):
     if type_of_func == FUNC.TYPE_SUBFUNCTION:
         steps = Internal.get_step_subfunctions(step, dialog=dialog)
         Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
-                item_file_param)
+            item_file_param)
         while step < steps:
             intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
             cprint(f'intent {intent}', 'red')
             type_of_func = Kernel.get_type_of_func(intent)
             name_func = Kernel.get_func(intent)
             res, param = Internal.subfunction(name_func, intent, param, message)
-            Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
+            Internal.save_dialog(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
             param[RES.STEP]+=1
             step = param[RES.STEP]
+            Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
+                item_file_param)
     if type_of_func == FUNC.TYPE_CONNECTION:
         intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
         res, message = Internal.connect(name_func, intent, param, message)
-        Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
-                item_file_param)
+        Internal.save_dialog(res, param, type_of_func, name_func, dialog, item_file_dialog,
+            item_file_param)
         param[RES.STEP]+=1
         step = param[RES.STEP]
+        Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
+            item_file_param)
     print('param', param)
     print('res', res)
     return res
