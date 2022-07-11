@@ -27,7 +27,10 @@ def bot_core(message):
         steps = Internal.get_step_subfunctions(step, dialog=dialog)
         Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
             item_file_param)
-        while step < steps:
+        step = param[RES.STEP]
+        i = step
+        while i <= steps:
+            print('step', step, 'steps+1', steps+1)
             intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
             cprint(f'intent {intent}', 'red')
             type_of_func = Kernel.get_type_of_func(intent)
@@ -35,8 +38,8 @@ def bot_core(message):
             res, param = Internal.subfunction(name_func, intent, param, message)
             Internal.save_dialog(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
-            param[RES.STEP]+=1
-            step = param[RES.STEP]
+            i+=1
+            param[RES.STEP] = i
             Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
     if type_of_func == FUNC.TYPE_CONNECTION:
