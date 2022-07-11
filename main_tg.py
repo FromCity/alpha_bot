@@ -3,7 +3,7 @@ from threading import current_thread # эта библиотека идет вм
 from aiogram import Bot, Dispatcher, executor, types # импортируем aiogram
 import internal as Internal
 from lib import kernel as Kernel
-from lib.dialog import dialog
+from lib.dialog import dialog as d
 from lib.param import functions as FUNC
 from lib.param import results as RES
 from lib.dialog import param
@@ -11,39 +11,48 @@ from termcolor import cprint
 
 
 step = param[RES.STEP]
-MAX_STEP = len(dialog)
-intent = dialog[step]
+MAX_STEP = len(d)
+intent = d[step]
 item_file_dialog = 'test_dialog.json'
 item_file_param = 'test_param.json'
 current_dialog_file = 'test_current_dialog.json'
 
 
 def bot_core(message):
-    intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
+    step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
     res = None
+    intent = d[step]
     type_of_func = Kernel.get_type_of_func(intent)
     name_func = Kernel.get_func(intent)
     if type_of_func == FUNC.TYPE_SUBFUNCTION:
-        steps = Internal.get_step_subfunctions(step, dialog=dialog)
+        cprint('SUBFUNC', 'yellow')
+        steps = Internal.get_step_subfunctions(step, dialog=d)
         Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
             item_file_param)
         step = param[RES.STEP]
         i = step
-        while i <= steps:
+        for i in range(step, steps+1):
             print('step', step, 'steps+1', steps+1)
-            intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
-            cprint(f'intent {intent}', 'red')
+            print('i', i)
+            step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
+            print(f'intent {intent}')
+            intent = d[step]
             type_of_func = Kernel.get_type_of_func(intent)
             name_func = Kernel.get_func(intent)
+            cprint(f'name of func:{name_func}', 'yellow')
             res, param = Internal.subfunction(name_func, intent, param, message)
             Internal.save_dialog(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
-            i+=1
             param[RES.STEP] = i
             Internal.save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
                 item_file_param)
+    step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
+    intent = d[step]
+    type_of_func = Kernel.get_type_of_func(intent)
+    name_func = Kernel.get_func(intent)
     if type_of_func == FUNC.TYPE_CONNECTION:
-        intent, step, param, dialog = Internal.load_param(item_file_dialog, item_file_param)
+        cprint('CONNECT', 'blue')
+        cprint(f'name of func:{name_func}', 'blue')
         res, message = Internal.connect(name_func, intent, param, message)
         Internal.save_dialog(res, param, type_of_func, name_func, dialog, item_file_dialog,
             item_file_param)

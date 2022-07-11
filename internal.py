@@ -53,10 +53,7 @@ def get_step_subfunctions(step, dialog):
         if type_of_func == FUNC.TYPE_SUBFUNCTION:
             i+=1
         else:
-            if i > step:
-                return i-1
-            elif i == step:
-                return i
+            return i
 
 
 def save_param(res, param, type_of_func, name_func, dialog, item_file_dialog,
@@ -92,5 +89,4 @@ def load_param(item_file_dialog, item_file_param):
     dialog = Kernel.load_file(item_file_dialog)
     param  = Kernel.load_file(item_file_param)
     step = param[RES.STEP]
-    intent = dialog[step]
-    return intent, step, param, dialog
+    return step, param, dialog
