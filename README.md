@@ -1,1 +1,1 @@
-# alpha_bot v0.1
+# alpha_bot v1.00
