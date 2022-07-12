@@ -83,7 +83,7 @@ def find(sentence):
     return question
 
 
-def find_name(sentence, names = ['Aleksey', 'Jonson' , 'Ivan', 'Mikki']):
+def find_name(sentence, names = ['Алексей', 'Иван' , 'Наташа', 'Ольга']):
     l = sentence.split()
     for word in l:
         if word in names:
