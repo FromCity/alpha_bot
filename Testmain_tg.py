@@ -4,7 +4,7 @@ from internal import get_step_subfunctions
 from lib.dialog import dialog
 from internal import save_param, load_param, get_number_of_current_intent, added_intent_to_dialog
 from lib.param import functions as FUNC
-
+from lib.kernel import find_name
 
 item_file_dialog = 'test_dialog.json'
 item_file_param = 'test_param.json'
@@ -34,7 +34,6 @@ class test_get_step_subfunctions(unittest.TestCase):
 
     def test_get_current_intent(self):
         self.assertEqual(get_number_of_current_intent(dialog), len(dialog))
-
 
     def test_added_intent_to_dialog(self):
         self.assertEqual(added_intent_to_dialog(dialog[0], current_dialog_file), 0)

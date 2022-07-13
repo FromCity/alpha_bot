@@ -83,8 +83,15 @@ def find(sentence):
     return question
 
 
-def find_name(sentence, names = ['Алексей', 'Иван' , 'Наташа', 'Вера']):
+def load_names(names_file_item = '/home/al/Documents/pypro/alpha_bot/lib/data/names'):
+    with open(names_file_item, 'r') as f:
+        names = f.read()
+    return names
+
+
+def find_name(sentence):
     l = sentence.split()
+    names = load_names().split(' ')
     for word in l:
         if word in names:
             return word
