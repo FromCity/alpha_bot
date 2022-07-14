@@ -4,11 +4,12 @@ from aiogram import Bot, Dispatcher, executor, types # импортируем ai
 import internal as Internal
 from lib import kernel as Kernel
 from lib.dialog import dialog as d
+from lib.dialog import param as p
 from lib.param import functions as FUNC
 from lib.param import results as RES
 from lib.dialog import param
 from termcolor import cprint
-
+from init_dialog import init_dialog
 
 step = param[RES.STEP]
 MAX_STEP = len(d)
@@ -16,6 +17,7 @@ intent = d[step]
 item_file_dialog = 'test_dialog.json'
 item_file_param = 'test_param.json'
 current_dialog_file = 'test_current_dialog.json'
+
 
 
 def bot_core(message):
@@ -69,6 +71,7 @@ API_TOKEN = '5462176083:AAG57-aMFkTFQ85LjEjofePVXnXKobxPoys' # Токен
 logging.basicConfig(level=logging.INFO) # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
+init_dialog(item_file=item_file_param, init_data=p)
 
 
 @dp.message_handler(commands=['start', 'help'])

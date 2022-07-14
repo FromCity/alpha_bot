@@ -23,6 +23,7 @@ def dumpJs(itemFileJs, dataJs):
         json.dump(dataJs, f)
     return 1
 
+
 def save_file(item_file, data):
     res = dumpJs(itemFileJs=item_file, dataJs=data)
     return res
