@@ -28,9 +28,11 @@ def save_file(item_file, data):
     res = dumpJs(itemFileJs=item_file, dataJs=data)
     return res
 
+
 def load_file(item_file):
     data = loadJs(itemFileJs=item_file)
     return data
+
 
 def get_func(dict_) -> str:
     return list(dict_.values())[0][0]
@@ -91,6 +93,7 @@ def load_names(names_file_item = '/home/al/Documents/pypro/alpha_bot/lib/data/na
 
 
 def find_name(sentence):
+    sentence = re.sub(r'[,:]', '', sentence)
     l = sentence.split()
     names = load_names().split(' ')
     for word in l:
